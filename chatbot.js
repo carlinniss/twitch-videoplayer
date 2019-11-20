@@ -64,15 +64,30 @@ Bot.on('message', chatter => {
 
     //slaps voting -- !slaps
     if(chatter.message.includes('!slaps')) {
-        Con.query("insert into slaps SELECT * FROM player.songs order by id asc limit 1", function (err, rows, fields) {
+        Con.query("SELECT song_name, video_id, user_requested FROM player.songs order by id asc limit 1", function (err, rows, fields) {
+            var sql = "insert into slaps (song_name, video_id, user_requested, time) VALUES (?,?,?,NOW())";
+            var values = [rows[0].song_name, rows[0].video_id, chatter.username]
+            sql = mysql.format(sql, values);
+            Con.query(sql, function (error, results, fields) {
+                if (error) throw error;
+                console.log("Slaps inserted");
+            });
             Bot.say(chatter.display_name + " voted that this video SLAPS!");
         });
     }
 
     //slaps voting -- sucks
     if(chatter.message.includes('!sucks')) {
-        Con.query("insert into sucks SELECT * FROM player.songs order by id asc limit 1", function (err, rows, fields) {
-            Bot.say(chatter.display_name + " voted that this video SUCKS!");
+        Con.query("SELECT song_name, video_id, user_requested FROM player.songs order by id asc limit 1", function (err, rows, fields) {
+            var sql = "insert into sucks (song_name, video_id, user_requested, time) VALUES (?,?,?,NOW())";
+            var values = [rows[0].song_name, rows[0].video_id, chatter.username]
+            sql = mysql.format(sql, values);
+            Con.query(sql, function (error, results, fields) {
+                if (error) throw error;
+                console.log("Sucks inserted");
+            });
+
+            Bot.say(chatter.display_name + " voted that this video SUCKS! savage.");
         });
     }
 
