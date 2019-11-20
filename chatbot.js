@@ -11,8 +11,6 @@ const port = 420
 
 app.use(express.static('public'))
 
-var $ = require('jQuery');
-
 const Con = mysql.createConnection({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
