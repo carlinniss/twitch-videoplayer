@@ -22,7 +22,7 @@ Con.connect();
 const Bot = new TwitchBot({
     username: 'dtldagodstudbot',
     oauth: process.env.OAUTH,
-    channels: ['dtl_da_god']
+    channels: [process.env.CHANNEL]
 })
 
 Bot.on('join', channel => {
@@ -112,7 +112,7 @@ Bot.on('message', chatter => {
     }
 
     function is_mod(){
-        if (chatter.username === 'dtl_da_god' || chatter.mod !== false )  {
+        if (chatter.username === process.env.CHANNEL || chatter.mod !== false )  {
             return true;
         }
         return false;
@@ -167,7 +167,7 @@ Bot.on('message', chatter => {
                 const firstResult = videos[0]
 
                 Bot.say('video requested: ' + firstResult.title + " by " + chatter.display_name);
-                if (video_id == false) {
+                if (video_id === false) {
                     add_yt_song(firstResult.videoId, firstResult.title, chatter.display_name);
                 } else {
                     add_yt_song(term, firstResult.title, chatter.display_name);
@@ -183,18 +183,21 @@ Bot.on('message', chatter => {
 //app controllers for views
 app.get('/', function (req, res) {
     Con.query("select count(*) as songs_left from songs", function (err, result, fields) {
-        if (result[0].songs_left > 0) {
-            Con.query("SELECT * FROM songs order by id asc limit 1;", function (err, result, fields) {
-                if (err) throw err;
-                console.log(result);
-                var template = fs.readFileSync('player.html', 'utf8');
-                var rendered = Mustache.render(template, {
-                    song_name: result[0].song_name,
-                    video_id: result[0].video_id,
-                    user_requested: result[0].user_requested
+        if (typeof result !== 'undefined') {
+            if (result[0].songs_left > 0) {
+                Con.query("SELECT * FROM songs order by id asc limit 1;", function (err, result, fields) {
+                    if (err) throw err;
+                    console.log(result);
+                    var template = fs.readFileSync('player.html', 'utf8');
+                    var rendered = Mustache.render(template, {
+                        song_name: result[0].song_name,
+                        video_id: result[0].video_id,
+                        user_requested: result[0].user_requested,
+                        channel: process.env.CHANNEL
+                    });
+                    res.send(rendered);
                 });
-                res.send(rendered);
-            });
+            }
         }
         else{
             res.sendFile('/Users/carli/WebstormProjects/twitchplayer/public/no_mo.html');
