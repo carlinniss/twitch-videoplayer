@@ -183,7 +183,7 @@ Bot.on('message', chatter => {
 //app controllers for views
 app.get('/', function (req, res) {
     Con.query("select count(*) as songs_left from songs", function (err, result, fields) {
-        if (typeof result !== 'undefined') {
+        if (typeof result !== 'undefined' || result === '') {
             if (result[0].songs_left > 0) {
                 Con.query("SELECT * FROM songs order by id asc limit 1;", function (err, result, fields) {
                     if (err) throw err;
@@ -197,6 +197,9 @@ app.get('/', function (req, res) {
                     });
                     res.send(rendered);
                 });
+            }
+            else{
+                res.sendFile('/Users/carli/WebstormProjects/twitchplayer/public/no_mo.html');
             }
         }
         else{
