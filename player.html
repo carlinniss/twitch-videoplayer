@@ -59,8 +59,8 @@
         function onPlayerReady(event) {
             //load string here
             event.target.loadVideoById('{{ video_id }}');
-            event.target.playVideo();
             refresh_songs();
+            event.target.playVideo();
         }
 
         var done = false;
@@ -91,24 +91,26 @@
                 window.location.href = '/';
             }
             else {
+                refresh_songs();
                 player.loadVideoById(result[0].video_id);
                 player.playVideo();
-                refresh_songs();
             }
         });
     }
 
     function slaps(){
         $.getJSON("/current_song", function(result){
-            $("h1").empty();
-            let video_id = result[0].video_id;
-            $("h1").append(result[0].song_name + " requested by "+result[0].user_requested);
-            $.getJSON("/slaps/"+video_id, function(result){
-                $("h1").append(" Slaps: "+result.slaps_count);
-            });
-            $.getJSON("/sucks/"+video_id, function(result){
-                $("h1").append(" Sucks: "+result.sucks_count);
-            });
+            if (result !== undefined) {
+                $("h1").empty();
+                let video_id = result[0].video_id;
+                $("h1").append(result[0].song_name + " requested by " + result[0].user_requested);
+                $.getJSON("/slaps/" + video_id, function (result) {
+                    $("h1").append(" Slaps: " + result.slaps_count);
+                });
+                $.getJSON("/sucks/" + video_id, function (result) {
+                    $("h1").append(" Sucks: " + result.sucks_count);
+                });
+            }
         });
 
     }
