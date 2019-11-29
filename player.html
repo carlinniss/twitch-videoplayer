@@ -60,7 +60,7 @@
             //load string here
             event.target.loadVideoById('{{ video_id }}');
             refresh_songs();
-            event.target.playVideo();
+            playVideo();
         }
 
         var done = false;
@@ -69,6 +69,11 @@
                 next_song();
             }
         }
+
+        function playVideo(){
+            player.playVideo();
+        }
+
         function stopVideo() {
             player.stopVideo();
         }
@@ -93,7 +98,7 @@
             else {
                 refresh_songs();
                 player.loadVideoById(result[0].video_id);
-                player.playVideo();
+                playVideo();
             }
         });
     }
