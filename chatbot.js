@@ -31,7 +31,8 @@ Bot.on('join', channel => {
 
 Bot.on('message', chatter => {
     console.log(chatter);
-    if(chatter.message.includes('!yt') || chatter.message.includes('!sr')) {
+    let user_input = chatter.message.toLowerCase();
+    if(user_input.includes('!yt') || user_input.includes('!sr')) {
 
         //parse if url is in query, if so just grab the query string (particularly the video_id in v)
         if (chatter.message.includes('youtube.com') || chatter.message.includes('youtu.be')) {
@@ -44,14 +45,14 @@ Bot.on('message', chatter => {
         }
         else{
             // OR just send the whole query to the search
-            search = chatter.message.split('!sr')[1];
+            search = user_input.split('!sr')[1];
             params = search.trim();
             yt_search(params, false);
         }
     }
 
     //song list -- !sl
-    if(chatter.message === '!sl') {
+    if(user_input === '!sl') {
         Con.query("SELECT * FROM player.songs order by id asc limit 1,5;", function (err, rows, fields) {
             rows.forEach(function(row) {
                 console.log(row.song_name);
@@ -61,7 +62,7 @@ Bot.on('message', chatter => {
     }
 
     //slaps voting -- !slaps
-    if(chatter.message.includes('!slaps')) {
+    if(user_input.includes('!slaps')) {
         Con.query("SELECT song_name, video_id, user_requested FROM player.songs order by id asc limit 1", function (err, rows, fields) {
             var sql = "insert into slaps (song_name, video_id, user_requested, time) VALUES (?,?,?,NOW())";
             var values = [rows[0].song_name, rows[0].video_id, chatter.username]
@@ -75,7 +76,7 @@ Bot.on('message', chatter => {
     }
 
     //slaps voting -- sucks
-    if(chatter.message.includes('!sucks')) {
+    if(user_input.includes('!sucks')) {
         Con.query("SELECT song_name, video_id, user_requested FROM player.songs order by id asc limit 1", function (err, rows, fields) {
             var sql = "insert into sucks (song_name, video_id, user_requested, time) VALUES (?,?,?,NOW())";
             var values = [rows[0].song_name, rows[0].video_id, chatter.username]
@@ -90,7 +91,7 @@ Bot.on('message', chatter => {
     }
 
     //get current song
-    if(chatter.message.includes('!song') || chatter.message.includes('!playing') || chatter.message.includes('!current')) {
+    if(user_input.includes('!song') || chatter.message.includes('!playing') || chatter.message.includes('!current')) {
         Con.query("SELECT * FROM player.songs order by id asc limit 1;", function (err, rows, fields) {
             rows.forEach(function(row) {
                 console.log(row.song_name);
@@ -100,7 +101,7 @@ Bot.on('message', chatter => {
     }
 
     //delete song, should work for mods only
-    if(chatter.message.includes('!delete')) {
+    if(user_input.includes('!delete')) {
         if (is_mod() === true)  {
             var id = chatter.message.substr(chatter.message.indexOf(' ')+1);
             delete_song(id);
@@ -243,6 +244,7 @@ app.get('/next_song', function (req, res) {
                 delete_song(result[0].id, true);
                 Con.query("SELECT id, video_id, song_name,user_requested FROM player.songs order by id asc limit 1", function (err, result, fields) {
                     res.json(result);
+                    Bot.say("Now playing "+result[0].song_name+" requested by @"+result[0].user_requested);
                 })
             })
         }
