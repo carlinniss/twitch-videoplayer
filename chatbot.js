@@ -161,17 +161,22 @@ Bot.on('message', chatter => {
             ytSearch(term, function (err, r) {
                 if (err) throw err
 
-                const videos = r.videos
-                const playlists = r.playlists
-                const accounts = r.accounts
+                const videos = r.videos;
 
-                const firstResult = videos[0]
+                console.log(videos);
 
-                Bot.say('video requested: ' + firstResult.title + " by " + chatter.display_name);
-                if (video_id === false) {
-                    add_yt_song(firstResult.videoId, firstResult.title, chatter.display_name);
-                } else {
-                    add_yt_song(term, firstResult.title, chatter.display_name);
+                const firstResult = videos[0];
+
+                if (firstResult === undefined) {
+                    Bot.say("Sorry, can't get that video from YT! Try !sr (search term) if you haven't");
+                }
+                else {
+                    Bot.say('video requested: ' + firstResult.title + " by " + chatter.display_name);
+                    if (video_id === false) {
+                        add_yt_song(firstResult.videoId, firstResult.title, chatter.display_name);
+                    } else {
+                        add_yt_song(term, firstResult.title, chatter.display_name);
+                    }
                 }
             })
         }
