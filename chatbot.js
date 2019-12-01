@@ -244,7 +244,8 @@ app.get('/next_song', function (req, res) {
     Con.query("SELECT count(*) as video_count FROM player.songs", function (err, result, fields) {
         console.log('vid count' + result[0].video_count);
         count = result[0].video_count;
-        if (count >= 1) {
+        console.log("count "+count);
+        if (count > 1) {
             Con.query("SELECT id, video_id, song_name,user_requested FROM player.songs order by id asc limit 1", function (err, result, fields) {
                 delete_song(result[0].id, true);
                 Con.query("SELECT id, video_id, song_name,user_requested FROM player.songs order by id asc limit 1", function (err, result, fields) {
@@ -253,7 +254,7 @@ app.get('/next_song', function (req, res) {
                 })
             })
         }
-        else if (count === 0){
+        else{
             data = {
                 id: 0,
                 response: "No more songs"
