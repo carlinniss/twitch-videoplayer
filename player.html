@@ -92,8 +92,8 @@
 
     function next_song(){
         $.getJSON("/next_song", function(result){
-            if (result.response === undefined){
-                window.location.href = '/';
+            if (result.response === "Empty"){
+                window.location.href = '/no_mo.html';
             }
             else {
                 refresh_songs();
