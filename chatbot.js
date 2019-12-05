@@ -32,6 +32,27 @@ Bot.on('join', channel => {
 Bot.on('message', chatter => {
     console.log(chatter);
     let user_input = chatter.message.toLowerCase();
+    Con.query("SELECT * FROM player.emote_count", function (err, rows, fields) {
+        rows.forEach(function(row) {
+            console.log(row.emote);
+            if (user_input.includes(row.emote.toLowerCase())){
+                console.log('emote match');
+                var sql = "update emote_count set count=count+1 where emote = ?"
+                var values = [row.emote];
+                sql = mysql.format(sql, values);
+                Con.query(sql, function (err, rows, fields) {
+                })
+                var sql = "select * from emote_count where emote = ?"
+                var values = [row.emote];
+                sql = mysql.format(sql, values);
+                Con.query(sql, function (err, rows, fields) {
+                    console.log(rows);
+                    Bot.say(row.emote + " has been used "+rows[0].count + " times in chat");
+                })
+            }
+        });
+    });
+
     if(user_input.includes('!yt') || user_input.includes('!sr')) {
 
         //parse if url is in query, if so just grab the query string (particularly the video_id in v)
