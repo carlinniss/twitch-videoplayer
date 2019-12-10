@@ -30,11 +30,11 @@ Bot.on('join', channel => {
 })
 
 Bot.on('message', chatter => {
-    console.log(chatter);
+    //console.log(chatter);
     let user_input = chatter.message.toLowerCase();
     Con.query("SELECT * FROM player.emote_count", function (err, rows, fields) {
         rows.forEach(function(row) {
-            console.log(row.emote);
+            //console.log(row.emote);
             if (user_input.includes(row.emote.toLowerCase())){
                 console.log('emote match');
                 var sql = "update emote_count set count=count+1 where emote = ?"
@@ -59,7 +59,8 @@ Bot.on('message', chatter => {
         if (chatter.message.includes('youtube.com') || chatter.message.includes('youtu.be')) {
             params = chatter.message.substr(chatter.message.indexOf(' ')+1);
             params = strip_yt(params);
-            yt_search(params, true);
+            console.log("url search: "+params)
+            yt_search(params);
         }
         else if (chatter.message === "!sr"){
             Bot.say ("!sr (yt link or search term)")
@@ -68,7 +69,7 @@ Bot.on('message', chatter => {
             // OR just send the whole query to the search
             search = user_input.split('!sr')[1];
             params = search.trim();
-            yt_search(params, false);
+            yt_search(params);
         }
     }
 
@@ -76,7 +77,7 @@ Bot.on('message', chatter => {
     if(user_input === '!sl') {
         Con.query("SELECT * FROM player.songs order by id asc limit 1,5;", function (err, rows, fields) {
             rows.forEach(function(row) {
-                console.log(row.song_name);
+                //console.log(row.song_name);
                 Bot.say(row.id + " - " + row.song_name)
             });
         });
@@ -90,7 +91,7 @@ Bot.on('message', chatter => {
             sql = mysql.format(sql, values);
             Con.query(sql, function (error, results, fields) {
                 if (error) throw error;
-                console.log("Slaps inserted");
+                //console.log("Slaps inserted");
             });
             Bot.say(chatter.display_name + " voted that this video SLAPS!");
         });
@@ -115,7 +116,7 @@ Bot.on('message', chatter => {
     if(user_input.includes('!song') || chatter.message.includes('!playing') || chatter.message.includes('!current')) {
         Con.query("SELECT * FROM player.songs order by id asc limit 1;", function (err, rows, fields) {
             rows.forEach(function(row) {
-                console.log(row.song_name);
+                //console.log(row.song_name);
                 Bot.say(row.id + " - " + row.song_name+" requested by "+row.user_requested)
             });
         });
@@ -147,7 +148,7 @@ Bot.on('message', chatter => {
             var dupes = results[0]['dupes'];
 
             if (dupes > 0){
-                console.log("Dupes detected");
+                //console.log("Dupes detected");
                 Bot.say('Sorry @'+user_requested+", that's already been added to the playlist.");
             }
             else{
@@ -156,7 +157,7 @@ Bot.on('message', chatter => {
                 sql = mysql.format(sql, values);
                 Con.query(sql, function (error, results, fields) {
                     if (error) throw error;
-                    console.log("Song inserted");
+                    //console.log("Song inserted");
                 });
             }
         });
@@ -169,7 +170,7 @@ Bot.on('message', chatter => {
         }
         else {
             parsed = QueryString.parse(url.split("?")[1])
-            console.log(parsed.v);
+            //console.log(parsed.v);
             return parsed.v;
         }
     }
@@ -184,20 +185,33 @@ Bot.on('message', chatter => {
 
                 const videos = r.videos;
 
-                console.log(videos);
+                //console.log(term);
+                //console.log(videos);
 
-                const firstResult = videos[0];
+                var result = [];
 
-                if (firstResult === undefined) {
+                videos.forEach(function(row) {
+                    //console.log(term);
+                    console.log(row);
+                   if (term.toLowerCase() === row.videoId.toLowerCase()){
+                       result['videoId'] = row.videoId;
+                       result['title'] = row.title;
+                       //console.log(result);
+                   }
+
+                })
+
+                if (Object.keys(result).length === 0){
+                    result = videos[0];
+                }
+                //console.log(result);
+
+                if (result === undefined) {
                     Bot.say("Sorry, can't get that video from YT! Try !sr (search term) if you haven't");
                 }
                 else {
-                    Bot.say('video requested: ' + firstResult.title + " by " + chatter.display_name);
-                    if (video_id === false) {
-                        add_yt_song(firstResult.videoId, firstResult.title, chatter.display_name);
-                    } else {
-                        add_yt_song(term, firstResult.title, chatter.display_name);
-                    }
+                    Bot.say('video requested: ' + result.title + " by " + chatter.display_name);
+                    add_yt_song(result.videoId, result.title, chatter.display_name);
                 }
             })
         }
@@ -214,7 +228,7 @@ app.get('/', function (req, res) {
             if (result[0].songs_left > 0) {
                 Con.query("SELECT * FROM songs order by id asc limit 1;", function (err, result, fields) {
                     if (err) throw err;
-                    console.log(result);
+                    //console.log(result);
                     var template = fs.readFileSync('player.html', 'utf8');
                     var rendered = Mustache.render(template, {
                         song_name: result[0].song_name,
@@ -242,7 +256,7 @@ app.get('/current_song', function (req, res) {
     sql = mysql.format(sql, values);
     Con.query(sql, function (err, result, fields) {
         if (err) throw err;
-        console.log(result);
+        //console.log(result);
         res.json(result);
     });
 })
@@ -250,11 +264,11 @@ app.get('/current_song', function (req, res) {
 
 app.get('/song_list', function (req, res) {
     Con.query("select count(*) as songs_left from songs", function (err, result, fields) {
-        console.log(result[0].songs_left);
+        //console.log(result[0].songs_left);
         if (result[0].songs_left > 0) {
             Con.query("SELECT id,song_name FROM player.songs order by id asc limit 1,5", function (err, result, fields) {
                 if (err) throw err;
-                console.log(result);
+                //console.log(result);
                 res.json(result);
             });
         }
@@ -263,10 +277,10 @@ app.get('/song_list', function (req, res) {
 
 app.get('/next_song', function (req, res) {
     Con.query("SELECT count(*) as video_count FROM player.songs", function (err, result, fields) {
-        console.log('vid count' + result[0].video_count);
+        //console.log('vid count' + result[0].video_count);
         count = result[0].video_count;
 
-        console.log("count "+count);
+        //console.log("count "+count);
 
         if (count > 1) {
             Con.query("SELECT id, video_id, song_name,user_requested FROM player.songs order by id asc limit 1", function (err, result, fields) {
@@ -312,7 +326,7 @@ app.get('/slaps/:video_id', function (req, res) {
 
 //delete song from playlist, then calls this function
 function delete_song(id,played=false){
-    console.log('mod');
+    //console.log('mod');
     if (played === true) {
         sql = "insert into player.played_songs (select * from player.songs where id = ?)";
         var values = [id];
