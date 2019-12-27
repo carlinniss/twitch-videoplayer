@@ -90,8 +90,12 @@ Bot.on('message', chatter => {
 
     if(user_input === '!clear') {
         if (is_mod() === true) {
-            Con.query("delete from songs", function (err, rows, fields) {
-                Bot.say("queue cleared");
+            Con.query("select min(id) as min_id from songs", function (err, rows, fields) {
+                min_id = rows[0].min_id;
+                console.log(min_id);
+                Con.query("delete from songs where id not in ("+min_id+")", function (err, rows, fields) {
+                    Bot.say("queue cleared");
+                })
             });
         }
         else{
