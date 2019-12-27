@@ -53,13 +53,18 @@ Bot.on('message', chatter => {
         });
     });
 
-    if(user_input.includes('!yt') || user_input.includes('!sr')) {
+
+    if(user_input.includes('!commands') || user_input.includes("!help")) {
+        Bot.say ("!sr (request) | !sl song list | !slaps video is good | !sucks vote video bad | !song current song | !delete (number)")
+    }
+
+        if(user_input.includes('!yt') || user_input.includes('!sr')) {
 
         //parse if url is in query, if so just grab the query string (particularly the video_id in v)
         if (chatter.message.includes('youtube.com') || chatter.message.includes('youtu.be')) {
             params = chatter.message.substr(chatter.message.indexOf(' ')+1);
             params = strip_yt(params);
-            console.log("url search: "+params)
+            //console.log("url search: "+params)
             yt_search(params);
         }
         else if (chatter.message === "!sr"){
@@ -75,12 +80,23 @@ Bot.on('message', chatter => {
 
     //song list -- !sl
     if(user_input === '!sl') {
-        Con.query("SELECT * FROM player.songs order by id asc limit 1,5;", function (err, rows, fields) {
+        Con.query("SELECT * FROM player.songs order by id asc limit 1,8;", function (err, rows, fields) {
             rows.forEach(function(row) {
                 //console.log(row.song_name);
                 Bot.say(row.id + " - " + row.song_name)
             });
         });
+    }
+
+    if(user_input === '!clear') {
+        if (is_mod() === true) {
+            Con.query("delete from songs", function (err, rows, fields) {
+                Bot.say("queue cleared");
+            });
+        }
+        else{
+            Bot.say("You aren't a mod");
+        }
     }
 
     //slaps voting -- !slaps
@@ -192,11 +208,11 @@ Bot.on('message', chatter => {
 
                 videos.forEach(function(row) {
                     //console.log(term);
-                    console.log(row);
-                   if (term.toLowerCase() === row.videoId.toLowerCase()){
+                    //console.log(row);
+                   if (term === row.videoId){
                        result['videoId'] = row.videoId;
                        result['title'] = row.title;
-                       //console.log(result);
+                       console.log(result);
                    }
 
                 })
@@ -207,7 +223,7 @@ Bot.on('message', chatter => {
                 //console.log(result);
 
                 if (result === undefined) {
-                    Bot.say("Sorry, can't get that video from YT! Try !sr (search term) if you haven't");
+                    Bot.say("Sorry, can't get that video from YT! Try !sr (search term) instead of the URL");
                 }
                 else {
                     Bot.say('video requested: ' + result.title + " by " + chatter.display_name);
